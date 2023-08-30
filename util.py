@@ -30,7 +30,7 @@ class StackFrontier():
             self.frontier = self.frontier[:-1]
             return node
 
-
+#Queue fontier class
 class QueueFrontier(StackFrontier):
 
     def remove(self):
