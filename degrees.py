@@ -1,9 +1,9 @@
 import csv
 import sys
 
-from util import Node, StackFrontier, QueueFrontier
+from util import Node, QueueFrontier
 
-# Maps names to a set of corresponding person_ids
+# Initialize a dictionary that keeps track of names
 names = {}
 
 # Maps person_ids to a dictionary of: name, birth, movies (a set of movie_ids)
@@ -18,8 +18,14 @@ def load_data(directory):
     Load data from CSV files into memory.
     """
     # Load people
+    # The people.csv file has four columns: id, name, birth, and movies.
+    # The id column contains a unique integer identifier for each person.
+    # The name column contains the name of each person.
+    # The birth column contains the year in which each person was born.
+    # The movies column contains a comma-separated list of the IDs of all the movies in which that person has starred.
     with open(f"{directory}/people.csv", encoding="utf-8") as f:
         reader = csv.DictReader(f)
+
         for row in reader:
             people[row["id"]] = {
                 "name": row["name"],
@@ -32,6 +38,10 @@ def load_data(directory):
                 names[row["name"].lower()].add(row["id"])
 
     # Load movies
+    # The movies.csv file has three columns: id, title, and year.
+    # The id column contains a unique integer identifier for each movie.
+    # The title column contains the title of each movie.
+    # The year column contains the year in which each movie was released.
     with open(f"{directory}/movies.csv", encoding="utf-8") as f:
         reader = csv.DictReader(f)
         for row in reader:
@@ -42,6 +52,14 @@ def load_data(directory):
             }
 
     # Load stars
+    # The stars.csv file has two columns: person_id and movie_id.
+    # Each row contains one pair of identifiers.
+    # Each pair identifies one actor and one movie in which that actor starred.
+    # Each person_id in this file corresponds to an id value from the people.csv file.
+    # Each movie_id in this file corresponds to an id value from the movies.csv file.
+    # If Row 1 of stars.csv has the value 102 in the person_id column and the value 1045 in the movie_id column,
+    # then Row 1 indicates that actor 102 starred in movie 1045.
+    
     with open(f"{directory}/stars.csv", encoding="utf-8") as f:
         reader = csv.DictReader(f)
         for row in reader:
@@ -50,9 +68,9 @@ def load_data(directory):
                 movies[row["movie_id"]]["stars"].add(row["person_id"])
             except KeyError:
                 pass
+# Main Function
 
-
-def main():
+def main():    
     if len(sys.argv) > 2:
         sys.exit("Usage: python degrees.py [directory]")
     directory = sys.argv[1] if len(sys.argv) == 2 else "large"
@@ -62,12 +80,15 @@ def main():
     load_data(directory)
     print("Data loaded.")
 
+    #Taking the input of the source actor and the target actor
     source = person_id_for_name(input("Name: "))
     if source is None:
         sys.exit("Person not found.")
     target = person_id_for_name(input("Name: "))
     if target is None:
         sys.exit("Person not found.")
+
+    #Calculating the shortest path using bfs algorithm
 
     path = shortest_path(source, target)
 
@@ -117,6 +138,7 @@ def shortest_path(source, target):
 
         # Explore the neighbors of the current node
         for movie_id, person_id in neighbors_for_person(current_node.state):
+            #if the node is not visited and doesnt contain state then add the new node to frontier
             if person_id not in visited and not frontier.contains_state(person_id):
                 new_node = Node(state=person_id, parent=current_node, action=movie_id)
                 frontier.add(new_node)
@@ -167,3 +189,4 @@ def neighbors_for_person(person_id):
 
 if __name__ == "__main__":
     main()
+    
